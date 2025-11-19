@@ -1,0 +1,539 @@
+Country,ISO,ADM
+Afghanistan,AFG,ADM3
+Afghanistan,AFG,ADM4
+Åland Islands,ALA,ADM0
+Åland Islands,ALA,ADM1
+Åland Islands,ALA,ADM2
+Åland Islands,ALA,ADM3
+Åland Islands,ALA,ADM4
+Albania,ALB,ADM4
+Algeria,DZA,ADM4
+American Samoa,ASM,ADM1
+American Samoa,ASM,ADM2
+American Samoa,ASM,ADM4
+Andorra,AND,ADM2
+Andorra,AND,ADM3
+Andorra,AND,ADM4
+Angola,AGO,ADM4
+Anguilla,AIA,ADM1
+Anguilla,AIA,ADM2
+Anguilla,AIA,ADM3
+Anguilla,AIA,ADM4
+Antarctica,ATA,ADM1
+Antarctica,ATA,ADM2
+Antarctica,ATA,ADM3
+Antarctica,ATA,ADM4
+Antigua and Barbuda,ATG,ADM2
+Antigua and Barbuda,ATG,ADM3
+Antigua and Barbuda,ATG,ADM4
+Argentina,ARG,ADM3
+Argentina,ARG,ADM4
+Armenia,ARM,ADM3
+Armenia,ARM,ADM4
+Aruba,ABW,ADM1
+Aruba,ABW,ADM2
+Aruba,ABW,ADM3
+Aruba,ABW,ADM4
+Australia,AUS,ADM3
+Australia,AUS,ADM4
+Azerbaijan,AZE,ADM3
+Azerbaijan,AZE,ADM4
+Bahamas,BHS,ADM3
+Bahamas,BHS,ADM4
+Bahrain,BHR,ADM2
+Bahrain,BHR,ADM3
+Bahrain,BHR,ADM4
+Barbados,BRB,ADM2
+Barbados,BRB,ADM3
+Barbados,BRB,ADM4
+Belarus,BLR,ADM3
+Belarus,BLR,ADM4
+Belize,BLZ,ADM3
+Belize,BLZ,ADM4
+Benin,BEN,ADM4
+Bermuda,BMU,ADM1
+Bermuda,BMU,ADM2
+Bermuda,BMU,ADM3
+Bermuda,BMU,ADM4
+Bhutan,BTN,ADM3
+Bhutan,BTN,ADM4
+Bolivia (Plurinational State of),BOL,ADM4
+"Bonaire, Sint Eustatius and Saba",BES,ADM1
+"Bonaire, Sint Eustatius and Saba",BES,ADM2
+"Bonaire, Sint Eustatius and Saba",BES,ADM3
+"Bonaire, Sint Eustatius and Saba",BES,ADM4
+Bosnia and Herzegovina,BIH,ADM4
+Botswana,BWA,ADM3
+Botswana,BWA,ADM4
+Bouvet Island,BVT,ADM0
+Bouvet Island,BVT,ADM1
+Bouvet Island,BVT,ADM2
+Bouvet Island,BVT,ADM3
+Bouvet Island,BVT,ADM4
+Brazil,BRA,ADM3
+Brazil,BRA,ADM4
+British Indian Ocean Territory,IOT,ADM0
+British Indian Ocean Territory,IOT,ADM1
+British Indian Ocean Territory,IOT,ADM2
+British Indian Ocean Territory,IOT,ADM3
+British Indian Ocean Territory,IOT,ADM4
+British Virgin Islands,VGB,ADM1
+British Virgin Islands,VGB,ADM2
+British Virgin Islands,VGB,ADM3
+British Virgin Islands,VGB,ADM4
+Brunei Darussalam,BRN,ADM3
+Brunei Darussalam,BRN,ADM4
+Bulgaria,BGR,ADM3
+Bulgaria,BGR,ADM4
+Burkina Faso,BFA,ADM4
+Burundi,BDI,ADM4
+Cabo Verde,CPV,ADM3
+Cabo Verde,CPV,ADM4
+Cambodia,KHM,ADM4
+Cameroon,CMR,ADM4
+Canada,CAN,ADM4
+Cayman Islands,CYM,ADM1
+Cayman Islands,CYM,ADM2
+Cayman Islands,CYM,ADM3
+Cayman Islands,CYM,ADM4
+Central African Republic,CAF,ADM4
+Chad,TCD,ADM3
+Chad,TCD,ADM4
+Chile,CHL,ADM4
+China,CHN,ADM4
+"China, Hong Kong Special Administrative Region",HKG,ADM0
+"China, Hong Kong Special Administrative Region",HKG,ADM1
+"China, Hong Kong Special Administrative Region",HKG,ADM2
+"China, Hong Kong Special Administrative Region",HKG,ADM3
+"China, Hong Kong Special Administrative Region",HKG,ADM4
+"China, Macao Special Administrative Region",MAC,ADM0
+"China, Macao Special Administrative Region",MAC,ADM1
+"China, Macao Special Administrative Region",MAC,ADM2
+"China, Macao Special Administrative Region",MAC,ADM3
+"China, Macao Special Administrative Region",MAC,ADM4
+Christmas Island,CXR,ADM0
+Christmas Island,CXR,ADM1
+Christmas Island,CXR,ADM2
+Christmas Island,CXR,ADM3
+Christmas Island,CXR,ADM4
+Cocos (Keeling) Islands,CCK,ADM0
+Cocos (Keeling) Islands,CCK,ADM1
+Cocos (Keeling) Islands,CCK,ADM2
+Cocos (Keeling) Islands,CCK,ADM3
+Cocos (Keeling) Islands,CCK,ADM4
+Colombia,COL,ADM3
+Colombia,COL,ADM4
+Comoros,COM,ADM4
+Congo,COG,ADM3
+Congo,COG,ADM4
+Cook Islands,COK,ADM1
+Cook Islands,COK,ADM2
+Cook Islands,COK,ADM3
+Cook Islands,COK,ADM4
+Costa Rica,CRI,ADM4
+Côte d’Ivoire,CIV,ADM4
+Croatia,HRV,ADM3
+Croatia,HRV,ADM4
+Cuba,CUB,ADM3
+Cuba,CUB,ADM4
+Curaçao,CUW,ADM1
+Curaçao,CUW,ADM2
+Curaçao,CUW,ADM3
+Curaçao,CUW,ADM4
+Cyprus,CYP,ADM3
+Cyprus,CYP,ADM4
+Democratic People's Republic of Korea,PRK,ADM3
+Democratic People's Republic of Korea,PRK,ADM4
+Democratic Republic of the Congo,COD,ADM4
+Denmark,DNK,ADM3
+Denmark,DNK,ADM4
+Djibouti,DJI,ADM3
+Djibouti,DJI,ADM4
+Dominica,DMA,ADM2
+Dominica,DMA,ADM3
+Dominica,DMA,ADM4
+Dominican Republic,DOM,ADM3
+Dominican Republic,DOM,ADM4
+Ecuador,ECU,ADM3
+Ecuador,ECU,ADM4
+Egypt,EGY,ADM3
+Egypt,EGY,ADM4
+El Salvador,SLV,ADM3
+El Salvador,SLV,ADM4
+Equatorial Guinea,GNQ,ADM3
+Equatorial Guinea,GNQ,ADM4
+Eritrea,ERI,ADM3
+Eritrea,ERI,ADM4
+Estonia,EST,ADM4
+Eswatini,SWZ,ADM3
+Eswatini,SWZ,ADM4
+Ethiopia,ETH,ADM4
+Falkland Islands (Malvinas),FLK,ADM1
+Falkland Islands (Malvinas),FLK,ADM2
+Falkland Islands (Malvinas),FLK,ADM3
+Falkland Islands (Malvinas),FLK,ADM4
+Faroe Islands,FRO,ADM1
+Faroe Islands,FRO,ADM2
+Faroe Islands,FRO,ADM3
+Faroe Islands,FRO,ADM4
+Finland,FIN,ADM4
+French Guiana,GUF,ADM1
+French Guiana,GUF,ADM2
+French Guiana,GUF,ADM4
+French Polynesia,PYF,ADM1
+French Polynesia,PYF,ADM2
+French Polynesia,PYF,ADM3
+French Polynesia,PYF,ADM4
+French Southern Territories,ATF,ADM0
+French Southern Territories,ATF,ADM1
+French Southern Territories,ATF,ADM2
+French Southern Territories,ATF,ADM3
+French Southern Territories,ATF,ADM4
+Gabon,GAB,ADM3
+Gabon,GAB,ADM4
+Gambia,GMB,ADM4
+Georgia,GEO,ADM3
+Georgia,GEO,ADM4
+Germany,DEU,ADM4
+Ghana,GHA,ADM3
+Ghana,GHA,ADM4
+Gibraltar,GIB,ADM1
+Gibraltar,GIB,ADM2
+Gibraltar,GIB,ADM3
+Gibraltar,GIB,ADM4
+Greece,GRC,ADM4
+Greenland,GRL,ADM2
+Greenland,GRL,ADM3
+Greenland,GRL,ADM4
+Grenada,GRD,ADM2
+Grenada,GRD,ADM3
+Grenada,GRD,ADM4
+Guadeloupe,GLP,ADM1
+Guadeloupe,GLP,ADM2
+Guadeloupe,GLP,ADM3
+Guam,GUM,ADM1
+Guam,GUM,ADM3
+Guam,GUM,ADM4
+Guatemala,GTM,ADM3
+Guatemala,GTM,ADM4
+Guernsey,GGY,ADM1
+Guernsey,GGY,ADM2
+Guernsey,GGY,ADM3
+Guernsey,GGY,ADM4
+Guinea,GIN,ADM4
+Guinea-Bissau,GNB,ADM3
+Guinea-Bissau,GNB,ADM4
+Guyana,GUY,ADM3
+Guyana,GUY,ADM4
+Haiti,HTI,ADM4
+Heard Island and McDonald Islands,HMD,ADM0
+Heard Island and McDonald Islands,HMD,ADM1
+Heard Island and McDonald Islands,HMD,ADM2
+Heard Island and McDonald Islands,HMD,ADM3
+Heard Island and McDonald Islands,HMD,ADM4
+Holy See,VAT,ADM1
+Holy See,VAT,ADM2
+Holy See,VAT,ADM3
+Holy See,VAT,ADM4
+Honduras,HND,ADM3
+Honduras,HND,ADM4
+Hungary,HUN,ADM4
+Iceland,ISL,ADM3
+Iceland,ISL,ADM4
+Indonesia,IDN,ADM3
+Indonesia,IDN,ADM4
+Iraq,IRQ,ADM3
+Iraq,IRQ,ADM4
+Ireland,IRL,ADM4
+Isle of Man,IMN,ADM1
+Isle of Man,IMN,ADM2
+Isle of Man,IMN,ADM3
+Isle of Man,IMN,ADM4
+Israel,ISR,ADM3
+Israel,ISR,ADM4
+Jamaica,JAM,ADM4
+Japan,JPN,ADM3
+Japan,JPN,ADM4
+Jersey,JEY,ADM0
+Jersey,JEY,ADM1
+Jersey,JEY,ADM2
+Jersey,JEY,ADM3
+Jersey,JEY,ADM4
+Jordan,JOR,ADM3
+Jordan,JOR,ADM4
+Kazakhstan,KAZ,ADM3
+Kazakhstan,KAZ,ADM4
+Kenya,KEN,ADM4
+Kiribati,KIR,ADM3
+Kiribati,KIR,ADM4
+Kuwait,KWT,ADM3
+Kuwait,KWT,ADM4
+Kyrgyzstan,KGZ,ADM3
+Kyrgyzstan,KGZ,ADM4
+Lao People's Democratic Republic,LAO,ADM3
+Lao People's Democratic Republic,LAO,ADM4
+Latvia,LVA,ADM3
+Latvia,LVA,ADM4
+Lebanon,LBN,ADM3
+Lebanon,LBN,ADM4
+Lesotho,LSO,ADM3
+Lesotho,LSO,ADM4
+Liberia,LBR,ADM3
+Liberia,LBR,ADM4
+Libya,LBY,ADM2
+Libya,LBY,ADM3
+Libya,LBY,ADM4
+Liechtenstein,LIE,ADM2
+Liechtenstein,LIE,ADM3
+Liechtenstein,LIE,ADM4
+Lithuania,LTU,ADM4
+Luxembourg,LUX,ADM4
+Malawi,MWI,ADM4
+Malaysia,MYS,ADM4
+Maldives,MDV,ADM3
+Maldives,MDV,ADM4
+Mali,MLI,ADM4
+Malta,MLT,ADM2
+Malta,MLT,ADM3
+Malta,MLT,ADM4
+Marshall Islands,MHL,ADM2
+Marshall Islands,MHL,ADM3
+Marshall Islands,MHL,ADM4
+Martinique,MTQ,ADM1
+Martinique,MTQ,ADM2
+Mauritania,MRT,ADM3
+Mauritania,MRT,ADM4
+Mauritius,MUS,ADM2
+Mauritius,MUS,ADM3
+Mauritius,MUS,ADM4
+Mayotte,MYT,ADM1
+Mayotte,MYT,ADM2
+Mayotte,MYT,ADM3
+Mexico,MEX,ADM3
+Mexico,MEX,ADM4
+Micronesia (Federated States of),FSM,ADM3
+Micronesia (Federated States of),FSM,ADM4
+Monaco,MCO,ADM3
+Monaco,MCO,ADM4
+Mongolia,MNG,ADM3
+Mongolia,MNG,ADM4
+Montenegro,MNE,ADM2
+Montenegro,MNE,ADM3
+Montenegro,MNE,ADM4
+Montserrat,MSR,ADM1
+Montserrat,MSR,ADM2
+Montserrat,MSR,ADM3
+Montserrat,MSR,ADM4
+Morocco,MAR,ADM3
+Morocco,MAR,ADM4
+Mozambique,MOZ,ADM4
+Myanmar,MMR,ADM4
+Namibia,NAM,ADM3
+Namibia,NAM,ADM4
+Nauru,NRU,ADM2
+Nauru,NRU,ADM3
+Nauru,NRU,ADM4
+Nepal,NPL,ADM4
+Netherlands,NLD,ADM3
+Netherlands,NLD,ADM4
+New Caledonia,NCL,ADM1
+New Caledonia,NCL,ADM2
+New Caledonia,NCL,ADM3
+New Caledonia,NCL,ADM4
+New Zealand,NZL,ADM4
+Nicaragua,NIC,ADM3
+Nicaragua,NIC,ADM4
+Niger,NER,ADM4
+Nigeria,NGA,ADM3
+Nigeria,NGA,ADM4
+Niue,NIU,ADM2
+Niue,NIU,ADM3
+Niue,NIU,ADM4
+Norfolk Island,NFK,ADM0
+Norfolk Island,NFK,ADM1
+Norfolk Island,NFK,ADM2
+Norfolk Island,NFK,ADM3
+Norfolk Island,NFK,ADM4
+North Macedonia,MKD,ADM3
+North Macedonia,MKD,ADM4
+Northern Mariana Islands,MNP,ADM1
+Northern Mariana Islands,MNP,ADM3
+Northern Mariana Islands,MNP,ADM4
+Norway,NOR,ADM3
+Norway,NOR,ADM4
+Oman,OMN,ADM3
+Oman,OMN,ADM4
+Pakistan,PAK,ADM4
+Palau,PLW,ADM3
+Palau,PLW,ADM4
+Panama,PAN,ADM4
+Papua New Guinea,PNG,ADM4
+Paraguay,PRY,ADM3
+Paraguay,PRY,ADM4
+Peru,PER,ADM3
+Peru,PER,ADM4
+Philippines,PHL,ADM4
+Pitcairn,PCN,ADM1
+Pitcairn,PCN,ADM2
+Pitcairn,PCN,ADM3
+Pitcairn,PCN,ADM4
+Poland,POL,ADM4
+Portugal,PRT,ADM4
+Puerto Rico,PRI,ADM0
+Puerto Rico,PRI,ADM1
+Puerto Rico,PRI,ADM4
+Qatar,QAT,ADM3
+Qatar,QAT,ADM4
+Republic of Korea,KOR,ADM4
+Republic of Moldova,MDA,ADM2
+Republic of Moldova,MDA,ADM3
+Republic of Moldova,MDA,ADM4
+Réunion,REU,ADM1
+Réunion,REU,ADM2
+Romania,ROU,ADM3
+Romania,ROU,ADM4
+Russian Federation,RUS,ADM3
+Russian Federation,RUS,ADM4
+Saint Barthélemy,BLM,ADM1
+Saint Barthélemy,BLM,ADM2
+Saint Barthélemy,BLM,ADM3
+Saint Barthélemy,BLM,ADM4
+Saint Helena,SHN,ADM1
+Saint Helena,SHN,ADM2
+Saint Helena,SHN,ADM3
+Saint Helena,SHN,ADM4
+Saint Kitts and Nevis,KNA,ADM2
+Saint Kitts and Nevis,KNA,ADM3
+Saint Kitts and Nevis,KNA,ADM4
+Saint Lucia,LCA,ADM3
+Saint Lucia,LCA,ADM4
+Saint Martin (French Part),MAF,ADM0
+Saint Martin (French Part),MAF,ADM1
+Saint Martin (French Part),MAF,ADM2
+Saint Martin (French Part),MAF,ADM3
+Saint Martin (French Part),MAF,ADM4
+Saint Pierre and Miquelon,SPM,ADM0
+Saint Pierre and Miquelon,SPM,ADM1
+Saint Pierre and Miquelon,SPM,ADM2
+Saint Pierre and Miquelon,SPM,ADM3
+Saint Pierre and Miquelon,SPM,ADM4
+Saint Vincent and the Grenadines,VCT,ADM2
+Saint Vincent and the Grenadines,VCT,ADM3
+Saint Vincent and the Grenadines,VCT,ADM4
+Samoa,WSM,ADM3
+Samoa,WSM,ADM4
+San Marino,SMR,ADM2
+San Marino,SMR,ADM3
+San Marino,SMR,ADM4
+Sao Tome and Principe,STP,ADM3
+Sao Tome and Principe,STP,ADM4
+Sark,,ADM0
+Sark,,ADM1
+Sark,,ADM2
+Sark,,ADM3
+Sark,,ADM4
+Saudi Arabia,SAU,ADM3
+Saudi Arabia,SAU,ADM4
+Senegal,SEN,ADM4
+Serbia,SRB,ADM3
+Serbia,SRB,ADM4
+Seychelles,SYC,ADM4
+Singapore,SGP,ADM3
+Singapore,SGP,ADM4
+Sint Maarten (Dutch part),SXM,ADM0
+Sint Maarten (Dutch part),SXM,ADM1
+Sint Maarten (Dutch part),SXM,ADM2
+Sint Maarten (Dutch part),SXM,ADM3
+Sint Maarten (Dutch part),SXM,ADM4
+Slovenia,SVN,ADM3
+Slovenia,SVN,ADM4
+Somalia,SOM,ADM3
+Somalia,SOM,ADM4
+South Georgia and the South Sandwich Islands,SGS,ADM0
+South Georgia and the South Sandwich Islands,SGS,ADM1
+South Georgia and the South Sandwich Islands,SGS,ADM2
+South Georgia and the South Sandwich Islands,SGS,ADM3
+South Georgia and the South Sandwich Islands,SGS,ADM4
+South Sudan,SSD,ADM3
+South Sudan,SSD,ADM4
+Spain,ESP,ADM4
+State of Palestine,PSE,ADM3
+State of Palestine,PSE,ADM4
+Sudan,SDN,ADM3
+Sudan,SDN,ADM4
+Suriname,SUR,ADM3
+Suriname,SUR,ADM4
+Svalbard and Jan Mayen Islands,SJM,ADM0
+Svalbard and Jan Mayen Islands,SJM,ADM1
+Svalbard and Jan Mayen Islands,SJM,ADM2
+Svalbard and Jan Mayen Islands,SJM,ADM3
+Svalbard and Jan Mayen Islands,SJM,ADM4
+Sweden,SWE,ADM4
+Switzerland,CHE,ADM4
+Syrian Arab Republic,SYR,ADM4
+Tajikistan,TJK,ADM3
+Tajikistan,TJK,ADM4
+Thailand,THA,ADM3
+Thailand,THA,ADM4
+Timor-Leste,TLS,ADM3
+Timor-Leste,TLS,ADM4
+Togo,TGO,ADM3
+Togo,TGO,ADM4
+Tokelau,TKL,ADM1
+Tokelau,TKL,ADM2
+Tokelau,TKL,ADM3
+Tokelau,TKL,ADM4
+Tonga,TON,ADM3
+Tonga,TON,ADM4
+Trinidad and Tobago,TTO,ADM2
+Trinidad and Tobago,TTO,ADM3
+Trinidad and Tobago,TTO,ADM4
+Tunisia,TUN,ADM4
+Turkey,TUR,ADM3
+Turkey,TUR,ADM4
+Turkmenistan,TKM,ADM3
+Turkmenistan,TKM,ADM4
+Turks and Caicos Islands,TCA,ADM1
+Turks and Caicos Islands,TCA,ADM2
+Turks and Caicos Islands,TCA,ADM3
+Turks and Caicos Islands,TCA,ADM4
+Tuvalu,TUV,ADM4
+Ukraine,UKR,ADM4
+United Arab Emirates,ARE,ADM2
+United Arab Emirates,ARE,ADM3
+United Arab Emirates,ARE,ADM4
+United Kingdom of Great Britain and Northern Ireland,GBR,ADM4
+United Republic of Tanzania,TZA,ADM4
+United States Minor Outlying Islands,UMI,ADM0
+United States Minor Outlying Islands,UMI,ADM1
+United States Minor Outlying Islands,UMI,ADM2
+United States Minor Outlying Islands,UMI,ADM3
+United States Minor Outlying Islands,UMI,ADM4
+United States of America,USA,ADM3
+United States of America,USA,ADM4
+United States Virgin Islands,VIR,ADM1
+United States Virgin Islands,VIR,ADM2
+United States Virgin Islands,VIR,ADM4
+Uruguay,URY,ADM3
+Uruguay,URY,ADM4
+Uzbekistan,UZB,ADM3
+Uzbekistan,UZB,ADM4
+Vanuatu,VUT,ADM4
+Venezuela (Bolivarian Republic of),VEN,ADM3
+Venezuela (Bolivarian Republic of),VEN,ADM4
+Viet Nam,VNM,ADM3
+Viet Nam,VNM,ADM4
+Wallis and Futuna Islands,WLF,ADM1
+Wallis and Futuna Islands,WLF,ADM2
+Wallis and Futuna Islands,WLF,ADM3
+Wallis and Futuna Islands,WLF,ADM4
+Western Sahara,ESH,ADM0
+Western Sahara,ESH,ADM1
+Western Sahara,ESH,ADM2
+Western Sahara,ESH,ADM3
+Western Sahara,ESH,ADM4
+Yemen,YEM,ADM3
+Yemen,YEM,ADM4
+Zambia,ZMB,ADM3
+Zambia,ZMB,ADM4
+Zimbabwe,ZWE,ADM4

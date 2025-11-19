@@ -1,16 +1,18 @@
+import os
 import requests
 import pandas as pd
+from datetime import datetime, timedelta
 import time
 
 BASE_URL = "https://www.geoboundaries.org/api/current/gbOpen"
 ADM_LEVELS = ["ADM0", "ADM1", "ADM2", "ADM3", "ADM4"]
 
-def build_country_iso_from_csv(csv_path):
+def build_country_iso_from_csv(iso_path):
     """
     Reads a CSV of countries and their ISO codes.
     Returns a dictionary mapping the country to its iso code
     """
-    iso = pd.read_csv(csv_path)
+    iso = pd.read_csv(iso_path)
     iso.columns = iso.columns.str.strip() # clean the column names
 
     return dict(zip(iso['Country or Area'], iso['ISO-alpha3 code']))
@@ -26,7 +28,7 @@ def fetch_single_boundary(iso_code, adm):
 
     response = requests.get(url, timeout=10)
 
-    if response.stsatus_code == 200:
+    if response.status_code == 200:
         return response.json()
 
     if response.status_code == 404:
@@ -39,28 +41,61 @@ def fetch_single_boundary(iso_code, adm):
 
 # Full analysis across all countries + ADM levels
 
-def run_full_analysis(csv_path: str):
+def run_full_analysis(
+    iso_path="Valid country names and ISO codes - Sheet1.csv",
+    completed_path="geoBoundaries_metadata.csv",
+    missing_path="missing_layers.csv",
+    refresh_days=None,  # <-- you can change this
+):
     """
-    Loops through every country and ADM level
-    Returns:
-        - records 
-        - missing 
+    Collects metadata for all countries + ADM levels.
+    Skips fetching if an existing file is newer than `refresh_days`.
+    
+    refresh_days:
+        0 = always refresh
+        7 = refresh weekly
+        30 = refresh monthly
+        None = never refresh unless file missing
     """
-    country_iso = build_country_iso_from_csv(csv_path)
+
+    # --- 1. Check if output file exists ---
+    if os.path.exists(completed_path):
+        file_date = datetime.fromtimestamp(os.path.getmtime(completed_path))
+        age_days = (datetime.today() - file_date).days
+
+        # refresh_days=None means: do not refresh unless file missing
+        if refresh_days is None:
+            print(f"📁 File exists and refresh disabled. Using cached file: {completed_path}")
+            return pd.read_csv(completed_path), pd.read_csv(missing_path)
+
+        # If the file is fresh enough
+        if age_days <= refresh_days:
+            print(f"📁 Existing file is {age_days} days old (limit = {refresh_days}).")
+            print("➡️  Using cached file. No API calls made.")
+            return pd.read_csv(completed_path), pd.read_csv(missing_path)
+
+        else:
+            print(f"📁 Cached file is {age_days} days old — refreshing…")
+
+    else:
+        print("📁 No cached file found. Building new dataset…")
+
+    # If file does not exist or if need a refresh:
+    country_iso = build_country_iso_from_csv(iso_path)
     records = []
     missing = []
-
-    for country, iso, in country_iso_dict.items():
+    print("Starting the analysis on every country's adm level...")
+    for country, iso, in country_iso.items():
 
         for adm_level in ADM_LEVELS:
             data = fetch_single_boundary(iso, adm_level)
             if data is None:
-                missing.append((country, iso, adm))
+                missing.append((country, iso, adm_level))
                 continue
             records.append({
                 "Country": country,
                 "ISO": iso,
-                "BoundaryType": adm,
+                "BoundaryType": adm_level,
                 "BoundaryName": data.get("boundaryName"),
                 "License": data.get("boundaryLicense"),
                 "License Source": data.get("licenseSource"),
@@ -70,80 +105,15 @@ def run_full_analysis(csv_path: str):
             })
             time.sleep(0.2)
 
-    return records, missing
+   # --- 3. Save results ---
+    df = pd.DataFrame(records)
+    print(f"\n✅ Done! Saved metadata for {len(df)} boundaries.")
+    print(f"❗ Missing layers: {len(missing_layers)}")
+
+    return df, missing
 
 
-
-acceptable_licenses = ["CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
-                       "Creative Commons Attribution 2.5 India (CC BY 2.5 IN)",
-                       "Creative Commons Attribution 3.0 License",
-                       "Public Domain",
-                       "Other - Direct Permission",
-                       "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-                       "Creative Commons Attribution 4.0 (CC BY 4.0)",
-                       "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
-                       "Data license Germany - Attribution - Version 2.0",
-                       "MIMU Data License (MIMU)",
-                       "Open Data Commons Attribution License 1.0",
-                       "Open Government Licence v3.0",
-                       "Open Government Licence v1.0",
-                       "Other - Humanitarian",
-                       "Singapore Open Data License Version 1.0",
-                       "National Institute of Statistics (INE) Data License)",
-                       "Korea Open Government License Type 1 (Source Indication)",
-                       "Open Data Commons Public Domain Dedication and License (PDDL) v1.0",
-                       "UN SALB Data License",
-                       "Attribution 2.5 Denmark (CC BY 2.5 DK)",
-                       "Creative Commons Attribution 2.5 Generic",
-                       "Pixabay License for Content",
-                       "Etalab Open License 2.0",
-                       "Attribuzione 3.0 Italia (CC BY 3.0 IT)",
-                       "Federal Office of Topography swisstopo License",
-                       "Open Government Canada 2.0",
-                       "Sierra Leone Open License Agreement"
-]
-
-# The boundary levels to check
-ADM_LEVELS = ["ADM0", "ADM1", "ADM2", "ADM3", "ADM4"]
-
-# Empty list to store results
-records = []
-# Empty list to store layers with missing data
-missing = []
-
-for country, iso_code in country_iso.items():
-    for adm in ADM_LEVELS:
-        url = f"{BASE_URL}/{iso_code}/{adm}/"
-        try:
-            response = requests.get(url, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Extract key info from the API response
-                records.append({
-                    "Country": country,
-                    "ISO": iso_code,
-                    "BoundaryType": adm,
-                    "BoundaryName": data.get("boundaryName", None),
-                    "License": data.get("boundaryLicense", None),
-                    "License Source": data.get("licenseSource", None),
-                    "Source": data.get("boundarySourceURL", None),
-                    "Year": data.get("boundaryYearRepresented", None),
-                    "GeoJSON": data.get("gjDownloadURL", None),
-                })
-            elif response.status_code == 404:
-                missing.append((country, iso_code, adm))
-            else:
-                print(f"❌ No data for {country} ({iso_code}) at {adm} — Status {response.status_code}")
-        
-        except Exception as e:
-            print(f"⚠️ Error fetching {country} ({adm}): {e}")
-        
-        # Small delay to be nice to the API
-        time.sleep(0.2)
-
-# Convert all records into a DataFrame
-df = pd.DataFrame(records)
-df.to_csv("geoBoundaries_metadata.csv", index=False)
-
-print(f"\n✅ Done! Collected {len(df)} valid boundaries across {len(country_iso)} countries.")
+def check_license(completed_path):
+    """
+    Reads the completed CSV with each available 
+    """
