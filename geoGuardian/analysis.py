@@ -17,21 +17,83 @@ def build_country_iso_from_csv(iso_path):
 
     return dict(zip(iso['Country or Area'], iso['ISO-alpha3 code']))
 
-def fetch_single_boundary(iso_code, adm):
+def fetch_iso(iso_path, country_name):
+    """
+    Finds the country's iso code in order to fetch its boundary
+    """
+    country_iso = build_country_iso_from_csv(iso_path)
+
+    name_lower = country_name.strip().lower()
+
+    # Direct exact match
+    for country, iso in country_iso.items():
+        if country.lower() == name_lower:
+            return iso
+
+    # No match — find partial matches
+    suggestions = [
+        country for country in country_iso.keys()
+        if name_lower in country.lower()
+    ]
+
+    if suggestions:
+        print(f"🔍 Country not found. Did you mean: {', '.join(suggestions)}?")
+    else:
+        print("❌ Country not found and no suggestions available.")
+
+    return None
+
+def fetch_adm(adm):
+    """
+    checks adm is written in the right way
+    """
+    adm_str = str(adm).strip().upper()
+
+    if adm_str.startswith("ADM"):
+        return adm_str
+    
+    # If user typed just the number
+    if adm_str.isdigit():
+        return f"ADM{adm_str}"
+
+    raise ValueError(f"Invalid ADM input: {adm}")
+
+def fetch_single_boundary(iso_or_country, adm, iso_path):
     """
     Fetch a single ISO + ADM layer from the geoBoundaries API
     returns:
         - dictionary of data if exists
         - None if the data is missing
     """
-    url = f"{BASE_URL}/{iso_code}/{adm}/"
 
+    # Load ISO dictionary
+    country_iso = build_country_iso_from_csv(iso_path)
+
+    # Convert the input to uppercase for checking ISO codes
+    iso_candidate = iso_or_country.strip().upper()
+
+    # Check if user provided a valid ISO code (either ISO2 or ISO3)
+    if iso_candidate in country_iso.values():
+        iso = iso_candidate
+
+    else:
+        # Treat it as a country name lookup
+        iso = fetch_iso(iso_path, iso_or_country)
+
+        if iso is None:
+            print("❌ Could not resolve country name to ISO code.")
+            return None
+    adm_level = fetch_adm(adm)
+
+    url = f"{BASE_URL}/{iso}/{adm_level}/"
+    
     response = requests.get(url, timeout=10)
 
     if response.status_code == 200:
         return response.json()
 
     if response.status_code == 404:
+        print('Boundary not found, error 404')
         return None
 
     # other errors
