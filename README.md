@@ -22,7 +22,6 @@ This project depends on the following Python libraries:
 - PySide6
 
 Once UV is installed, you can add these dependencies by running:
-`uv add pandas requests PySide6`
 `uv sync`
 
 ### Running the Application
