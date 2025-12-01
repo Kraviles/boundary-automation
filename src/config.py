@@ -1,36 +1,3 @@
-import pandas as pd
-
-from analysis import build_country_iso_from_csv, fetch_iso, fetch_adm, fetch_single_boundary, run_full_analysis
-
-ISO_PATH = 'Valid country names and ISO codes - Sheet1.csv'
-completed_path="geoBoundaries_metadata.csv"
-missing_path="missing_layers.csv"
-
-# example of finding an iso code for a country
-print(fetch_iso(ISO_PATH, "United states of america"))
-
-# example of geting the adm level in the right format
-print(fetch_adm("ADM1"))
-
-# example of findng a country's boundary
-print(fetch_single_boundary("USA", 6, ISO_PATH))
-
-df,missing = run_full_analysis(ISO_PATH, completed_path, missing_path, refresh_days=None)
-
-df.to_csv("geoBoundaries_metadata.csv", index=False)
-
-
-# Save missing layers
-df_missing = pd.DataFrame(missing, columns=["Country", "ISO", "ADM"])
-df_missing.to_csv("missing_layers.csv", index=False)
-
-print("\n Done!")
-print(f"   • {len(df)} valid boundaries collected")
-print(f"   • {len(df_missing)} missing boundary layers")
-
-print(df.head())
-print(df.columns)
-
 acceptable_licenses = ["CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
                        "Creative Commons Attribution 2.5 India (CC BY 2.5 IN)",
                        "Creative Commons Attribution 3.0 License",
