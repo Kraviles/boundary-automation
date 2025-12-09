@@ -52,6 +52,23 @@ def fetch_github_issues():
         
     return pd.DataFrame(all_issues)
 
+def find_keyword(pr):
+    """
+    Grabs the ISO_ADMcode that is present in all pull requests,
+    """
+    title = pr.get("title", "")
+    return title.split()[0] if title else None
+
+def find_matching_issue(issues, keyword):
+    """
+    Finds the issue that corresponds to the pull request
+    """
+    for idx, row in issues.iterrows():
+        title = row['title']
+        if keyword.lower() in str(title).lower():
+            return row['title'], int(row['number'])  # return the matching row's number
+    
+    return None, None
 
 
 def summarize_pr(prs):
@@ -73,8 +90,14 @@ def summarize_pr(prs):
         "full_text": prs.get("body", "(no description)"),
         "boundary_filenames": [],
         "boundary_download_urls": [],
+        "issue_title": None,
+        "associated_issue_number": None
     }
-
+    keyword = (find_keyword(prs))
+    issue_title, issue_num = find_matching_issue(issues, keyword)
+    summary["issue_title"] = issue_title
+    summary["associated_issue_number"] = issue_num
+    
     # Method of grabbing the link!
     files_url = prs.get("url") + "/files"
 
@@ -98,6 +121,31 @@ def summarize_pr(prs):
         summary["boundary_download_urls"].append(f"ERROR: {e}")
 
     return summary
+
+def fetch_issue_by_number(issue_number):
+    """
+    Fetches a single issue by its number from repo.
+    Returns a dict with title and body (description), or None if not found.
+    """
+    url = f"https://api.github.com/repos/wmgeolab/geoBoundaries/issues/{issue_number}"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        issue = response.json()
+        return {
+            "number": issue.get("number"),
+            "title": issue.get("title"),
+            "body": issue.get("body")
+        }
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return None
+
+# Visualization of Boundaries
 
 def process_boundary_file(filename, url, title=None):
     """
