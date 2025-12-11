@@ -21,7 +21,7 @@ from .config import (
     LABEL_COUNTRY, GROUP_MAIN_BOUNDARY, LABEL_SOURCE, LABEL_ADM_LEVEL,
     GROUP_COMPARISON_BOUNDARY, BUTTON_RUN_ANALYSIS, BUTTON_COMPARE_ON_MAP,
     BUTTON_START_LICENSE_DETECTION,
-    COMBOBOX_SELECT_COUNTRY_DEFAULT, TABLE_HEADERS_LICENSE,
+    COMBOBOX_SELECT_COUNTRY_DEFAULT, COMBOBOX_SELECT_ADM_DEFAULT, TABLE_HEADERS_LICENSE,
     LOG_START_ANALYSIS, LOG_ANALYSIS_FINISHED, LOG_LOADED_BOUNDARIES, LOG_MISSING_LAYERS,
     LOG_SELECT_FULL_BOUNDARIES, LOG_ERROR_MAIN_BOUNDARY_NOT_FOUND,
     LOG_ERROR_COMP_BOUNDARY_NOT_FOUND, LOG_FETCHING_MAIN, LOG_FETCHING_COMPARISON,
@@ -444,7 +444,7 @@ class DataCollectionTab(qtw.QWidget):
         self.run_analysis_button.clicked.connect(self.run_analysis)
         self.country_filter.currentTextChanged.connect(self.update_filters_for_country)
         self.main_adm_filter.currentTextChanged.connect(self.update_sources_for_adm)
-        self.comp_adm_filter.currentTextChanged.connect(lambda: self.update_sources_for_adm(is_comparison=True))
+        self.comp_adm_filter.currentTextChanged.connect(lambda text: self.update_sources_for_adm(text, is_comparison=True))
         self.compare_button.clicked.connect(self.compare_on_map)
 
     def setup_web_channel(self):
@@ -482,8 +482,12 @@ class DataCollectionTab(qtw.QWidget):
             if 'ADM_Level' not in self.missing_df.columns:
                 # If still missing, drop to empty to avoid KeyError
                 self.missing_df = pd.DataFrame(columns=['Country', 'ISO', 'ADM_Level'])
-        # Create a source column for filtering based on year and license
-        self.df['Source'] = self.df['Year'].astype(str) + " - " + self.df['License'].astype(str)
+        # Normalize BoundaryType to avoid whitespace/case mismatches
+        if 'BoundaryType' in self.df.columns:
+            self.df['BoundaryType'] = self.df['BoundaryType'].astype(str).str.strip().str.upper()
+        # Create a display source column for filtering based on year and license, keeping original Source intact
+        self.df[['Year', 'License', 'BoundaryName']] = self.df[['Year', 'License', 'BoundaryName']].fillna('unknown')
+        self.df['DisplaySource'] = self.df['Year'].astype(str) + " - " + self.df['License'] + " (" + self.df['BoundaryName'] + ")"
         self.populate_country_filter()
 
     def populate_country_filter(self):
@@ -512,19 +516,21 @@ class DataCollectionTab(qtw.QWidget):
                 except KeyError:
                     missing_adms = set()
                 adms = [adm for adm in adms if adm not in missing_adms]
+            
+            # Add placeholder
+            adms.insert(0, COMBOBOX_SELECT_ADM_DEFAULT)
+
             for combo in [self.main_adm_filter, self.comp_adm_filter]:
                 combo.blockSignals(True)
                 combo.addItems(adms)
-                # Set index to 0 and manually trigger update
+                # Set index to 0 (which is the placeholder)
                 if combo.count() > 0:
                     combo.setCurrentIndex(0)
                 combo.blockSignals(False)
 
-            # Manually trigger updates for source filters after ADM is populated
-            self.update_sources_for_adm(is_comparison=False)
-            self.update_sources_for_adm(is_comparison=True)
+        # The source filters will be updated when the user makes a selection from the ADM dropdowns.
 
-    def update_sources_for_adm(self, is_comparison=False):
+    def update_sources_for_adm(self, _text=None, is_comparison=False):
         adm_filter = self.comp_adm_filter if is_comparison else self.main_adm_filter
         source_filter = self.comp_source_filter if is_comparison else self.main_source_filter
 
@@ -535,34 +541,46 @@ class DataCollectionTab(qtw.QWidget):
         selected_country = self.country_filter.currentText()
         selected_adm = adm_filter.currentText()
 
+        # Guard against placeholder selection
+        if selected_adm == COMBOBOX_SELECT_ADM_DEFAULT:
+            return
+
         if selected_country != COMBOBOX_SELECT_COUNTRY_DEFAULT and selected_adm:
             sub_df = self.df[(self.df['Country'] == selected_country) & (self.df['BoundaryType'] == selected_adm)]
-            sources = sorted(sub_df['Source'].unique())
             source_filter.blockSignals(True)
-            source_filter.addItems(sources)
+            source_filter.clear()
+            source_filter.addItem("Select Source", userData=None)
+            # Use a tuple of (display_label, real_source_url) to sort and add items
+            sources = sorted(sub_df[['DisplaySource', 'Source']].drop_duplicates().itertuples(index=False, name=None))
+            for display_label, real_source in sources:
+                source_filter.addItem(display_label, userData=real_source)
             source_filter.blockSignals(False)
 
     def compare_on_map(self):
         country = self.country_filter.currentText()
-        main_source = self.main_source_filter.currentText()
+        main_source_url = self.main_source_filter.currentData()
         main_adm = self.main_adm_filter.currentText()
-        comp_source = self.comp_source_filter.currentText()
+        comp_source_url = self.comp_source_filter.currentData()
         comp_adm = self.comp_adm_filter.currentText()
 
-        if country == COMBOBOX_SELECT_COUNTRY_DEFAULT or not all([main_source, main_adm, comp_source, comp_adm]):
+        if country == COMBOBOX_SELECT_COUNTRY_DEFAULT or not all([main_source_url, main_adm, comp_source_url, comp_adm]):
             self.log_text.append(LOG_SELECT_FULL_BOUNDARIES)
             return
 
-        # Find the rows in the dataframe
-        main_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == main_source) & (self.df['BoundaryType'] == main_adm)]
-        comp_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == comp_source) & (self.df['BoundaryType'] == comp_adm)]
+        # Find the rows in the dataframe using the real source URL from userData
+        main_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == main_source_url) & (self.df['BoundaryType'] == main_adm)]
+        comp_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == comp_source_url) & (self.df['BoundaryType'] == comp_adm)]
 
         if main_row.empty:
-            self.log_text.append(LOG_ERROR_MAIN_BOUNDARY_NOT_FOUND.format(country, main_source, main_adm))
+            # Use currentText() for the user-facing log message
+            main_source_text = self.main_source_filter.currentText()
+            self.log_text.append(LOG_ERROR_MAIN_BOUNDARY_NOT_FOUND.format(country, main_source_text, main_adm))
             return
         
         if comp_row.empty:
-            self.log_text.append(LOG_ERROR_COMP_BOUNDARY_NOT_FOUND.format(country, comp_source, comp_adm))
+            # Use currentText() for the user-facing log message
+            comp_source_text = self.comp_source_filter.currentText()
+            self.log_text.append(LOG_ERROR_COMP_BOUNDARY_NOT_FOUND.format(country, comp_source_text, comp_adm))
             return
 
         main_url = main_row.iloc[0]['GeoJSON']

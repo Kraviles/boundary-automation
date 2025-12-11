@@ -35,6 +35,8 @@ BUTTON_START_LICENSE_DETECTION = "Start License Detection"
 BUTTON_FETCH_ISSUES = "Fetch Issues"
 
 COMBOBOX_SELECT_COUNTRY_DEFAULT = "Select a Country"
+COMBOBOX_SELECT_ADM_DEFAULT = "Select an ADM Level"
+COMBOBOX_SELECT_ADM_DEFAULT = "Select ADM Level"
 
 TABLE_HEADERS_LICENSE = ["Country", "ISO", "BoundaryType", "License"]
 TABLE_HEADERS_ISSUES = ["Number", "Title", "State", "Labels"]
