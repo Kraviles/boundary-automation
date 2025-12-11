@@ -28,7 +28,7 @@ def fetch_pull_requests():
         all_prs.extend(prs)
         page += 1
 
-    print(f"✅ Fetched {len(all_prs)} pull requests in total")
+    print(f"Fetched {len(all_prs)} pull requests in total")
     return all_prs
 
 def fetch_github_issues():
@@ -157,7 +157,7 @@ def process_boundary_file(filename, url, title=None):
     if title is None:
         title = filename  # fallback
 
-    print(f"⬇️ Downloading {filename} ...")
+    print(f"Downloading {filename} ...")
     zip_path = filename + ".zip"
 
     # Download (stream=True prevents loading entire file into memory)
@@ -169,7 +169,7 @@ def process_boundary_file(filename, url, title=None):
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
 
-    print(f"📦 Saved ZIP as {zip_path}")
+    print(f"Saved ZIP as {zip_path}")
 
     # Unzip destination folder
     extract_to = f"unzipped_{filename}"
@@ -179,7 +179,7 @@ def process_boundary_file(filename, url, title=None):
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
 
-    print(f"✅ Extracted to: {os.path.abspath(extract_to)}")
+    print(f"Extracted to: {os.path.abspath(extract_to)}")
 
     # Detect .shp or .geojson
     shp_file = None
@@ -194,16 +194,16 @@ def process_boundary_file(filename, url, title=None):
 
     # Decide which file to load
     if shp_file:
-        print(f"🗂 Found shapefile: {shp_file}")
+        print(f" Found shapefile: {shp_file}")
         gdf = gpd.read_file(shp_file)
     elif geojson_file:
-        print(f"🗂 Found GeoJSON: {geojson_file}")
+        print(f" Found GeoJSON: {geojson_file}")
         gdf = gpd.read_file(geojson_file)
     else:
-        raise FileNotFoundError("❌ No .shp or .geojson found in extracted files.")
+        raise FileNotFoundError(" No .shp or .geojson found in extracted files.")
 
     # Show preview of dataset
-    print("\n📍 GeoDataFrame preview:")
+    print("\nGeoDataFrame preview:")
     print(gdf.head())
 
     # Plot with title
@@ -222,12 +222,12 @@ def preview_boundary_from_url(download_url, title=None, save_as=None):
     if save_as is None:
         save_as = download_url.split('/')[-1]  # default to filename from URL
 
-    print(f"⬇️ Downloading boundary file:\n   {download_url}")
+    print(f"Downloading boundary file:\n   {download_url}")
 
     response = requests.get(download_url, stream=True)
 
     if response.status_code != 200:
-        print(f"❌ Failed to download. Status code: {response.status_code}")
+        print(f" Failed to download. Status code: {response.status_code}")
         return None
 
     # Write ZIP to disk
@@ -236,7 +236,7 @@ def preview_boundary_from_url(download_url, title=None, save_as=None):
             if chunk:
                 f.write(chunk)
 
-    print(f"   ✅ Saved as: {save_as}")
+    print(f"  Saved as: {save_as}")
 
     # Now preview it
     return process_boundary_file(save_as.replace(".zip", ""), download_url, title=title)
