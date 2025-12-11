@@ -7,4 +7,5 @@ dependencies = [
     "requests",
     "matplotlib",
     "pyshp",
+    "geopandas",
 ]

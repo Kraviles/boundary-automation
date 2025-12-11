@@ -14,7 +14,8 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6 import QtCore as qtc
 
-from .analysis import run_full_analysis, check_license, fetch_github_issues, fetch_github_pull_requests, fetch_raw_github_content, fetch_single_pull_request, fetch_pull_request_files
+from .analysis import run_full_analysis, check_license, fetch_github_pull_requests, fetch_raw_github_content, fetch_single_pull_request, fetch_pull_request_files
+from .pr import fetch_issue_by_number, find_keyword, find_matching_issue, fetch_github_issues as fetch_issues_from_pr
 from .config import (
     acceptable_licenses,
     ISO_CODES_PATH, METADATA_PATH, MISSING_LAYERS_PATH, MAP_HTML_PATH,
@@ -338,31 +339,34 @@ class PRDataWorker(qtc.QThread):
                 return
 
             # Fetch associated issue
-            issue_details = "No associated issue found."
+            pr_body_text = pr_details.get('body', '(No PR body found)')
+            issue_details = pr_body_text # Default to PR body as fallback
+            found_issue_number = None
+
             # Primary: explicit closes #NNN in PR body
             if pr_details.get('body'):
                 match = re.search(r'closes #(\d+)', pr_details['body'], re.IGNORECASE)
                 if match:
-                    issue_number = match.group(1)
-                    issue_url = f"https://api.github.com/repos/wmgeolab/geoBoundaries/issues/{issue_number}"
-                    issue_data = fetch_single_pull_request(issue_url) # Reusing this function as it just fetches a URL
-                    if issue_data:
-                        issue_details = f"Title: {issue_data.get('title')}\n\n{issue_data.get('body')}"
-            # Secondary: heuristic match on issue title using boundary_identifier
-            if issue_details == "No associated issue found." and boundary_identifier:
-                issues_df = fetch_github_issues()
-                if not issues_df.empty:
-                    try:
-                        # Look for first issue title containing the boundary identifier
-                        match_issue = issues_df[issues_df['title'].str.contains(boundary_identifier, case=False, na=False)]
-                        if not match_issue.empty:
-                            issue_number = match_issue.iloc[0].get('number')
-                            issue_url = f"https://api.github.com/repos/wmgeolab/geoBoundaries/issues/{issue_number}"
-                            issue_data = fetch_single_pull_request(issue_url)
-                            if issue_data:
-                                issue_details = f"Title: {issue_data.get('title')}\n\n{issue_data.get('body')}"
-                    except Exception as e:
-                        issue_details = f"No associated issue found. ({e})"
+                    found_issue_number = int(match.group(1))
+
+            # Secondary: Use the logic from pr.py as requested by the user
+            if found_issue_number is None:
+                issues_df = fetch_issues_from_pr()
+                keyword = find_keyword(pr_details)
+                if keyword and not issues_df.empty:
+                    issue_title, issue_num = find_matching_issue(issues_df, keyword)
+                    if issue_num:
+                        found_issue_number = issue_num
+            
+            if found_issue_number:
+                issue_data = fetch_issue_by_number(found_issue_number)
+                if issue_data:
+                    issue_details = f"Issue #{issue_data.get('number')} - {issue_data.get('title')}\n\n{issue_data.get('body')}"
+                else:
+                    issue_details = pr_body_text
+            else:
+                issue_details = pr_body_text
+
             data['issue_details'] = issue_details
 
             self.finished.emit(data)

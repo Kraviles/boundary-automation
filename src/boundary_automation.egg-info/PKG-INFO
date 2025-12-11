@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: boundary-automation
+Version: 0.1.0
+Requires-Dist: pyside6
+Requires-Dist: pandas
+Requires-Dist: requests
+Requires-Dist: matplotlib
+Requires-Dist: pyshp
+Requires-Dist: geopandas

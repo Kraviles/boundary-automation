@@ -1,0 +1,6 @@
+pyside6
+pandas
+requests
+matplotlib
+pyshp
+geopandas
