@@ -100,7 +100,8 @@ class PRDataWorker(qtc.QThread):
             'boundary_preview_bytes': None,
             'projection_info': "Projection not found",
             'issue_details': "No associated issue found.",
-            'boundary_error': None
+            'boundary_error': None,
+            'attribute_df': None
         }
         try:
             if not self.pr_url:
@@ -241,7 +242,9 @@ class PRDataWorker(qtc.QThread):
                                 import matplotlib.pyplot as plt
                                 import geopandas as gpd
                                 gdf = gpd.read_file(preview_source)
-                                fig, ax = plt.subplots(figsize=(4, 3))
+                                
+                                # Generate preview
+                                fig, ax = plt.subplots(figsize=(6, 5))
                                 gdf.plot(ax=ax, linewidth=0.5, edgecolor="black", facecolor="#9ecae1")
                                 ax.axis('off')
                                 buf = io.BytesIO()
@@ -249,12 +252,16 @@ class PRDataWorker(qtc.QThread):
                                 plt.close(fig)
                                 buf.seek(0)
                                 data['boundary_preview_bytes'] = buf.read()
+                                
+                                # Extract attribute table
+                                data['attribute_df'] = pd.DataFrame(gdf.drop(columns='geometry'))
+
                             except ImportError:
                                 # Fallback: minimal rendering with pyshp or raw geojson
                                 import matplotlib
                                 matplotlib.use("Agg")
                                 import matplotlib.pyplot as plt
-                                fig, ax = plt.subplots(figsize=(4, 3))
+                                fig, ax = plt.subplots(figsize=(6, 5))
                                 rendered = False
                                 if shapefile_path:
                                     try:
@@ -269,19 +276,32 @@ class PRDataWorker(qtc.QThread):
                                                     xs, ys = zip(*seg)
                                                     ax.plot(xs, ys, color="black", linewidth=0.5)
                                         rendered = True
+                                        
+                                        # Extract attribute table from shapefile
+                                        fields = [field[0] for field in reader.fields[1:]]
+                                        records = [record[:] for record in reader.iterRecords()]
+                                        data['attribute_df'] = pd.DataFrame(records, columns=fields)
+
                                     except Exception as e:
                                         data['boundary_error'] = f"Shapefile preview failed: {e}"
                                 if geojson_path and not rendered:
                                     try:
                                         with open(geojson_path, "r", encoding="utf-8") as f:
                                             gj = json.load(f)
+                                        
+                                        # Extract attribute table from GeoJSON
+                                        features = gj.get("features", [])
+                                        if features:
+                                            properties = [feature.get("properties", {}) for feature in features]
+                                            data['attribute_df'] = pd.DataFrame(properties)
+
                                         def plot_coords(coords):
                                             for poly in coords:
                                                 for ring in poly:
                                                     xs, ys = zip(*ring)
                                                     ax.plot(xs, ys, color="black", linewidth=0.5)
                                         if gj.get("type") == "FeatureCollection":
-                                            for feat in gj.get("features", []):
+                                            for feat in features:
                                                 geom = feat.get("geometry") or {}
                                                 coords = geom.get("coordinates") or []
                                                 if geom.get("type") == "Polygon":
@@ -693,11 +713,15 @@ class PullRequestVerificationTab(qtw.QWidget):
         pr_selector_layout.addWidget(self.fetch_prs_button)
         layout.addLayout(pr_selector_layout)
 
-        # Main content area
-        main_content_layout = qtw.QHBoxLayout()
-        
+        # Main content splitter (vertical)
+        main_splitter = qtw.QSplitter(qtc.Qt.Vertical)
+
+        # Top section for metadata and previews
+        top_splitter = qtw.QSplitter(qtc.Qt.Horizontal)
+
         # Left side: meta.txt and issue details
-        left_layout = qtw.QVBoxLayout()
+        left_widget = qtw.QWidget()
+        left_layout = qtw.QVBoxLayout(left_widget)
         self.meta_text = qtw.QTextEdit()
         self.meta_text.setReadOnly(True)
         self.meta_text.setPlaceholderText("meta.txt content will be displayed here.")
@@ -709,25 +733,41 @@ class PullRequestVerificationTab(qtw.QWidget):
         self.issue_details_text.setPlaceholderText("Associated issue details will be displayed here.")
         left_layout.addWidget(qtw.QLabel("Issue Details"))
         left_layout.addWidget(self.issue_details_text)
-        main_content_layout.addLayout(left_layout)
+        top_splitter.addWidget(left_widget)
 
-        # Right side: license image and projection
-        right_layout = qtw.QVBoxLayout()
+        # Right side: license image and boundary preview (in a splitter)
+        right_splitter = qtw.QSplitter(qtc.Qt.Vertical)
+
+        license_group = qtw.QGroupBox("license.png")
+        license_layout = qtw.QVBoxLayout(license_group)
         self.license_image_label = qtw.QLabel("license.png will be displayed here.")
         self.license_image_label.setFrameShape(qtw.QFrame.StyledPanel)
         self.license_image_label.setAlignment(qtc.Qt.AlignCenter)
-        right_layout.addWidget(qtw.QLabel("license.png"))
-        right_layout.addWidget(self.license_image_label, 1)
+        license_layout.addWidget(self.license_image_label)
+        right_splitter.addWidget(license_group)
 
+        boundary_group = qtw.QGroupBox("Boundary Preview")
+        boundary_layout = qtw.QVBoxLayout(boundary_group)
         self.boundary_image_label = qtw.QLabel("Boundary preview will be displayed here.")
         self.boundary_image_label.setFrameShape(qtw.QFrame.StyledPanel)
         self.boundary_image_label.setAlignment(qtc.Qt.AlignCenter)
-        right_layout.addWidget(qtw.QLabel("Boundary Preview"))
-        right_layout.addWidget(self.boundary_image_label, 1)
+        boundary_layout.addWidget(self.boundary_image_label)
+        right_splitter.addWidget(boundary_group)
+        
+        top_splitter.addWidget(right_splitter)
+        top_splitter.setSizes([self.width() // 3, 2 * self.width() // 3]) # Give more space to previews
+        main_splitter.addWidget(top_splitter)
 
-        main_content_layout.addLayout(right_layout)
 
-        layout.addLayout(main_content_layout)
+        # Bottom section for attribute table
+        attribute_group = qtw.QGroupBox("Attribute Table")
+        attribute_layout = qtw.QVBoxLayout(attribute_group)
+        self.attribute_table = qtw.QTableWidget()
+        attribute_layout.addWidget(self.attribute_table)
+        main_splitter.addWidget(attribute_group)
+
+        main_splitter.setSizes([2 * self.height() // 3, self.height() // 3]) # Give more space to top section
+        layout.addWidget(main_splitter)
 
         # Connections
         self.fetch_prs_button.clicked.connect(self.fetch_pull_requests)
@@ -735,7 +775,6 @@ class PullRequestVerificationTab(qtw.QWidget):
 
     def fetch_pull_requests(self):
         self.fetch_prs_button.setEnabled(False)
-        # Store worker as an instance attribute to prevent premature garbage collection
         self._pull_request_worker = PullRequestWorker(self)
         self._pull_request_worker.finished.connect(self.update_pr_selector)
         self._pull_request_worker.finished.connect(self._pull_request_worker.deleteLater)
@@ -759,16 +798,13 @@ class PullRequestVerificationTab(qtw.QWidget):
                 )
         else:
             self.pr_selector.addItem("No open pull requests found (check rate limit or set GITHUB_TOKEN).")
-        # Trigger initial load for the first item if available
         if self.pr_selector.count() > 0:
             self.on_pr_selected()
-        # Clean up worker reference after use
         self._pull_request_worker = None
 
     def on_pr_selected(self):
         pr_data = self.pr_selector.currentData()
         if pr_data:
-            # Store worker as an instance attribute to prevent premature garbage collection
             self._pr_data_worker = PRDataWorker(pr_data['url'], pr_data['number'], pr_data['title'], pr_data['branch'])
             self._pr_data_worker.setParent(self)
             self._pr_data_worker.finished.connect(self.update_pr_data)
@@ -783,7 +819,8 @@ class PullRequestVerificationTab(qtw.QWidget):
             pixmap = QtGui.QPixmap()
             if pixmap.loadFromData(license_png_bytes):
                 self.license_image_label.setPixmap(pixmap.scaled(
-                    self.license_image_label.size(), 
+                    self.license_image_label.width(),
+                    self.license_image_label.height(),
                     qtc.Qt.KeepAspectRatio, 
                     qtc.Qt.SmoothTransformation
                 ))
@@ -797,7 +834,8 @@ class PullRequestVerificationTab(qtw.QWidget):
             bpx = QtGui.QPixmap()
             if bpx.loadFromData(boundary_bytes):
                 self.boundary_image_label.setPixmap(bpx.scaled(
-                    self.boundary_image_label.size(),
+                    self.boundary_image_label.width(),
+                    self.boundary_image_label.height(),
                     qtc.Qt.KeepAspectRatio,
                     qtc.Qt.SmoothTransformation
                 ))
@@ -811,8 +849,29 @@ class PullRequestVerificationTab(qtw.QWidget):
                 self.boundary_image_label.setText("Boundary preview unavailable")
             
         self.issue_details_text.setText(data.get('issue_details', ''))
-        # Clean up worker reference after use
+        
+        # Populate attribute table
+        attribute_df = data.get('attribute_df')
+        self.populate_attribute_table(attribute_df)
+
         self._pr_data_worker = None
+
+    def populate_attribute_table(self, df):
+        self.attribute_table.clear()
+        if df is None or df.empty:
+            self.attribute_table.setRowCount(0)
+            self.attribute_table.setColumnCount(0)
+            return
+
+        self.attribute_table.setRowCount(df.shape[0])
+        self.attribute_table.setColumnCount(df.shape[1])
+        self.attribute_table.setHorizontalHeaderLabels(df.columns)
+
+        for row_idx, row in enumerate(df.itertuples(index=False)):
+            for col_idx, value in enumerate(row):
+                item = qtw.QTableWidgetItem(str(value))
+                self.attribute_table.setItem(row_idx, col_idx, item)
+        self.attribute_table.resizeColumnsToContents()
 
 
 class MainWindow(qtw.QMainWindow):
