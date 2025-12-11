@@ -127,14 +127,17 @@ def check_license(completed_path, acceptable_licenses):
     """
     if not os.path.exists(completed_path):
         print(f'File not found: {completed_path}')
-        return pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame()
 
     df = pd.read_csv(completed_path)
+    
+    # Filter for rows where the license is in the acceptable list
+    acceptable_df = df[df['License'].isin(acceptable_licenses)]
     
     # Filter for rows where the license is not in the acceptable list
     unacceptable_df = df[~df['License'].isin(acceptable_licenses)]
     
-    return unacceptable_df
+    return acceptable_df, unacceptable_df
 
 
 def fetch_github_issues():

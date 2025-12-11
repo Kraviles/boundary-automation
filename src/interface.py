@@ -52,7 +52,7 @@ class AnalysisWorker(qtc.QThread):
         self.finished.emit(df, missing_df)
 
 class LicenseWorker(qtc.QThread):
-    finished = qtc.Signal(pd.DataFrame)
+    finished = qtc.Signal(pd.DataFrame, pd.DataFrame)
 
     def __init__(self, completed_path, acceptable_licenses, parent=None):
         super().__init__(parent)
@@ -60,8 +60,8 @@ class LicenseWorker(qtc.QThread):
         self.acceptable_licenses = acceptable_licenses
 
     def run(self):
-        unacceptable_df = check_license(self.completed_path, self.acceptable_licenses)
-        self.finished.emit(unacceptable_df)
+        acceptable_df, unacceptable_df = check_license(self.completed_path, self.acceptable_licenses)
+        self.finished.emit(acceptable_df, unacceptable_df)
 
 class IssuesWorker(qtc.QThread):
     finished = qtc.Signal(pd.DataFrame)
@@ -616,10 +616,30 @@ class LicenseDetectionTab(qtw.QWidget):
     def init_ui(self):
         layout = qtw.QVBoxLayout(self)
 
-        self.license_table = qtw.QTableWidget()
-        self.license_table.setColumnCount(len(TABLE_HEADERS_LICENSE))
-        self.license_table.setHorizontalHeaderLabels(TABLE_HEADERS_LICENSE)
-        layout.addWidget(self.license_table)
+        # Create a splitter to hold the two tables
+        splitter = qtw.QSplitter(qtc.Qt.Horizontal)
+
+        # Unacceptable licenses table
+        unacceptable_group = qtw.QGroupBox("Unacceptable Licenses")
+        unacceptable_layout = qtw.QVBoxLayout()
+        self.unacceptable_license_table = qtw.QTableWidget()
+        self.unacceptable_license_table.setColumnCount(len(TABLE_HEADERS_LICENSE))
+        self.unacceptable_license_table.setHorizontalHeaderLabels(TABLE_HEADERS_LICENSE)
+        unacceptable_layout.addWidget(self.unacceptable_license_table)
+        unacceptable_group.setLayout(unacceptable_layout)
+        splitter.addWidget(unacceptable_group)
+
+        # Acceptable licenses table
+        acceptable_group = qtw.QGroupBox("Acceptable Licenses")
+        acceptable_layout = qtw.QVBoxLayout()
+        self.acceptable_license_table = qtw.QTableWidget()
+        self.acceptable_license_table.setColumnCount(len(TABLE_HEADERS_LICENSE))
+        self.acceptable_license_table.setHorizontalHeaderLabels(TABLE_HEADERS_LICENSE)
+        acceptable_layout.addWidget(self.acceptable_license_table)
+        acceptable_group.setLayout(acceptable_layout)
+        splitter.addWidget(acceptable_group)
+
+        layout.addWidget(splitter)
 
         self.start_button = qtw.QPushButton(BUTTON_START_LICENSE_DETECTION)
         self.start_button.clicked.connect(self.run_license_check)
@@ -633,21 +653,27 @@ class LicenseDetectionTab(qtw.QWidget):
         self.log_text.append(LOG_START_LICENSE_DETECTION)
         self.start_button.setEnabled(False)
         self._license_worker = LicenseWorker(self.completed_path, acceptable_licenses, parent=self)
-        self._license_worker.finished.connect(self.update_license_table)
+        self._license_worker.finished.connect(self.update_license_tables)
         self._license_worker.finished.connect(self._license_worker.deleteLater)
         self._license_worker.start()
 
-    def update_license_table(self, unacceptable_df):
+    def update_license_tables(self, acceptable_df, unacceptable_df):
         self.log_text.append(LOG_LICENSE_DETECTION_FINISHED)
         self.start_button.setEnabled(True)
 
-        self.license_table.setRowCount(len(unacceptable_df))
-        for i, (_, row) in enumerate(unacceptable_df.iterrows()):
-            self.license_table.setItem(i, 0, qtw.QTableWidgetItem(row["Country"]))
-            self.license_table.setItem(i, 1, qtw.QTableWidgetItem(row["ISO"]))
-            self.license_table.setItem(i, 2, qtw.QTableWidgetItem(row["BoundaryType"]))
-            self.license_table.setItem(i, 3, qtw.QTableWidgetItem(row["License"]))
+        self.populate_table(self.unacceptable_license_table, unacceptable_df)
+        self.populate_table(self.acceptable_license_table, acceptable_df)
+
         self.log_text.append(LOG_UNACCEPTABLE_LICENSES.format(len(unacceptable_df)))
+        self.log_text.append(f"Found {len(acceptable_df)} boundaries with acceptable licenses.")
+
+    def populate_table(self, table, df):
+        table.setRowCount(len(df))
+        for i, (_, row) in enumerate(df.iterrows()):
+            table.setItem(i, 0, qtw.QTableWidgetItem(row["Country"]))
+            table.setItem(i, 1, qtw.QTableWidgetItem(row["ISO"]))
+            table.setItem(i, 2, qtw.QTableWidgetItem(row["BoundaryType"]))
+            table.setItem(i, 3, qtw.QTableWidgetItem(row["License"]))
 
 
 class PullRequestVerificationTab(qtw.QWidget):
