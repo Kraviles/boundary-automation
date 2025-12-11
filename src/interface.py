@@ -386,20 +386,28 @@ class GeoJsonWorker(qtc.QThread):
     def run(self):
         result = {'error': None, 'geojson': {}}
         try:
-            main_resp = requests_with_retry(self.main_url)
-            result['geojson']['main'] = main_resp.text
-        except requests.RequestException as e:
-            result['error'] = f"Error fetching main GeoJSON: {e}"
+            try:
+                main_resp = requests_with_retry(self.main_url)
+                result['geojson']['main'] = main_resp.text
+            except requests.RequestException as e:
+                result['error'] = f"Error fetching main GeoJSON: {e}"
+                sys.stderr.write(f"GeoJsonWorker Error: {result['error']}\n")
+                self.finished.emit(result)
+                return
+
+            try:
+                comp_resp = requests_with_retry(self.comp_url)
+                result['geojson']['comparison'] = comp_resp.text
+            except requests.RequestException as e:
+                result['error'] = f"Error fetching comparison GeoJSON: {e}"
+                sys.stderr.write(f"GeoJsonWorker Error: {result['error']}\n")
+
             self.finished.emit(result)
-            return
+        except Exception as e:
+            result['error'] = f"Unexpected error in GeoJsonWorker: {e}"
+            sys.stderr.write(f"GeoJsonWorker Critical Error: {result['error']}\n")
+            self.finished.emit(result)
 
-        try:
-            comp_resp = requests_with_retry(self.comp_url)
-            result['geojson']['comparison'] = comp_resp.text
-        except requests.RequestException as e:
-            result['error'] = f"Error fetching comparison GeoJSON: {e}"
-
-        self.finished.emit(result)
 
 
 class DataCollectionTab(qtw.QWidget):
@@ -526,101 +534,117 @@ class DataCollectionTab(qtw.QWidget):
         self.country_filter.blockSignals(False)
 
     def update_filters_for_country(self):
-        selected_country = self.country_filter.currentText()
-        
-        # Clear all dropdowns
-        for combo in [self.main_source_filter, self.main_adm_filter, self.comp_source_filter, self.comp_adm_filter]:
-            combo.blockSignals(True)
-            combo.clear()
-            combo.blockSignals(False)
-
-        if selected_country != COMBOBOX_SELECT_COUNTRY_DEFAULT:
-            country_df = self.df[self.df['Country'] == selected_country]
-            adms = sorted(country_df['BoundaryType'].unique())
-            if hasattr(self, "missing_df") and not self.missing_df.empty:
-                try:
-                    missing_adms = set(self.missing_df[self.missing_df['Country'] == selected_country]['ADM_Level'])
-                except KeyError:
-                    missing_adms = set()
-                adms = [adm for adm in adms if adm not in missing_adms]
+        try:
+            selected_country = self.country_filter.currentText()
             
-            # Add placeholder
-            adms.insert(0, COMBOBOX_SELECT_ADM_DEFAULT)
-
-            for combo in [self.main_adm_filter, self.comp_adm_filter]:
+            # Clear all dropdowns
+            for combo in [self.main_source_filter, self.main_adm_filter, self.comp_source_filter, self.comp_adm_filter]:
                 combo.blockSignals(True)
-                combo.addItems(adms)
-                # Set index to 0 (which is the placeholder)
-                if combo.count() > 0:
-                    combo.setCurrentIndex(0)
+                combo.clear()
                 combo.blockSignals(False)
 
-        # The source filters will be updated when the user makes a selection from the ADM dropdowns.
+            if selected_country != COMBOBOX_SELECT_COUNTRY_DEFAULT:
+                country_df = self.df[self.df['Country'] == selected_country]
+                adms = sorted(country_df['BoundaryType'].unique())
+                if hasattr(self, "missing_df") and not self.missing_df.empty:
+                    try:
+                        missing_adms = set(self.missing_df[self.missing_df['Country'] == selected_country]['ADM_Level'])
+                    except KeyError:
+                        missing_adms = set()
+                    adms = [adm for adm in adms if adm not in missing_adms]
+                
+                # Add placeholder
+                adms.insert(0, COMBOBOX_SELECT_ADM_DEFAULT)
+
+                for combo in [self.main_adm_filter, self.comp_adm_filter]:
+                    combo.blockSignals(True)
+                    combo.addItems(adms)
+                    # Set index to 0 (which is the placeholder)
+                    if combo.count() > 0:
+                        combo.setCurrentIndex(0)
+                    combo.blockSignals(False)
+
+            # The source filters will be updated when the user makes a selection from the ADM dropdowns.
+        except Exception as e:
+            sys.stderr.write(f"Error in update_filters_for_country: {e}\n")
+            self.log_text.append(f"ERROR: {e}")
+
 
     def update_sources_for_adm(self, _text=None, is_comparison=False):
-        adm_filter = self.comp_adm_filter if is_comparison else self.main_adm_filter
-        source_filter = self.comp_source_filter if is_comparison else self.main_source_filter
+        try:
+            adm_filter = self.comp_adm_filter if is_comparison else self.main_adm_filter
+            source_filter = self.comp_source_filter if is_comparison else self.main_source_filter
 
-        source_filter.blockSignals(True)
-        source_filter.clear()
-        source_filter.blockSignals(False)
-
-        selected_country = self.country_filter.currentText()
-        selected_adm = adm_filter.currentText()
-
-        # Guard against placeholder selection
-        if selected_adm == COMBOBOX_SELECT_ADM_DEFAULT:
-            return
-
-        if selected_country != COMBOBOX_SELECT_COUNTRY_DEFAULT and selected_adm:
-            sub_df = self.df[(self.df['Country'] == selected_country) & (self.df['BoundaryType'] == selected_adm)]
             source_filter.blockSignals(True)
             source_filter.clear()
-            source_filter.addItem("Select Source", userData=None)
-            # Use a tuple of (display_label, real_source_url) to sort and add items
-            sources = sorted(sub_df[['DisplaySource', 'Source']].drop_duplicates().itertuples(index=False, name=None))
-            for display_label, real_source in sources:
-                source_filter.addItem(display_label, userData=real_source)
             source_filter.blockSignals(False)
 
+            selected_country = self.country_filter.currentText()
+            selected_adm = adm_filter.currentText()
+
+            # Guard against placeholder selection
+            if selected_adm == COMBOBOX_SELECT_ADM_DEFAULT:
+                return
+
+            if selected_country != COMBOBOX_SELECT_COUNTRY_DEFAULT and selected_adm:
+                sub_df = self.df[(self.df['Country'] == selected_country) & (self.df['BoundaryType'] == selected_adm)]
+                source_filter.blockSignals(True)
+                source_filter.clear()
+                source_filter.addItem("Select Source", userData=None)
+                # Use a tuple of (display_label, real_source_url) to sort and add items
+                sources = sorted(sub_df[['DisplaySource', 'Source']].drop_duplicates().itertuples(index=False, name=None))
+                for display_label, real_source in sources:
+                    source_filter.addItem(display_label, userData=real_source)
+                source_filter.blockSignals(False)
+        except Exception as e:
+            sys.stderr.write(f"Error in update_sources_for_adm: {e}\n")
+            self.log_text.append(f"ERROR: {e}")
+
+
     def compare_on_map(self):
-        country = self.country_filter.currentText()
-        main_source_url = self.main_source_filter.currentData()
-        main_adm = self.main_adm_filter.currentText()
-        comp_source_url = self.comp_source_filter.currentData()
-        comp_adm = self.comp_adm_filter.currentText()
+        try:
+            country = self.country_filter.currentText()
+            main_source_url = self.main_source_filter.currentData()
+            main_adm = self.main_adm_filter.currentText()
+            comp_source_url = self.comp_source_filter.currentData()
+            comp_adm = self.comp_adm_filter.currentText()
 
-        if country == COMBOBOX_SELECT_COUNTRY_DEFAULT or not all([main_source_url, main_adm, comp_source_url, comp_adm]):
-            self.log_text.append(LOG_SELECT_FULL_BOUNDARIES)
-            return
+            if country == COMBOBOX_SELECT_COUNTRY_DEFAULT or not all([main_source_url, main_adm, comp_source_url, comp_adm]):
+                self.log_text.append(LOG_SELECT_FULL_BOUNDARIES)
+                return
 
-        # Find the rows in the dataframe using the real source URL from userData
-        main_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == main_source_url) & (self.df['BoundaryType'] == main_adm)]
-        comp_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == comp_source_url) & (self.df['BoundaryType'] == comp_adm)]
+            # Find the rows in the dataframe using the real source URL from userData
+            main_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == main_source_url) & (self.df['BoundaryType'] == main_adm)]
+            comp_row = self.df[(self.df['Country'] == country) & (self.df['Source'] == comp_source_url) & (self.df['BoundaryType'] == comp_adm)]
 
-        if main_row.empty:
-            # Use currentText() for the user-facing log message
-            main_source_text = self.main_source_filter.currentText()
-            self.log_text.append(LOG_ERROR_MAIN_BOUNDARY_NOT_FOUND.format(country, main_source_text, main_adm))
-            return
-        
-        if comp_row.empty:
-            # Use currentText() for the user-facing log message
-            comp_source_text = self.comp_source_filter.currentText()
-            self.log_text.append(LOG_ERROR_COMP_BOUNDARY_NOT_FOUND.format(country, comp_source_text, comp_adm))
-            return
+            if main_row.empty:
+                # Use currentText() for the user-facing log message
+                main_source_text = self.main_source_filter.currentText()
+                self.log_text.append(LOG_ERROR_MAIN_BOUNDARY_NOT_FOUND.format(country, main_source_text, main_adm))
+                return
+            
+            if comp_row.empty:
+                # Use currentText() for the user-facing log message
+                comp_source_text = self.comp_source_filter.currentText()
+                self.log_text.append(LOG_ERROR_COMP_BOUNDARY_NOT_FOUND.format(country, comp_source_text, comp_adm))
+                return
 
-        main_url = main_row.iloc[0]['GeoJSON']
-        comp_url = comp_row.iloc[0]['GeoJSON']
+            main_url = main_row.iloc[0]['GeoJSON']
+            comp_url = comp_row.iloc[0]['GeoJSON']
 
-        self.log_text.append(LOG_FETCHING_MAIN.format(main_url))
-        self.log_text.append(LOG_FETCHING_COMPARISON.format(comp_url))
-        self.compare_button.setEnabled(False)
-        self._geojson_worker = GeoJsonWorker(main_url, comp_url)
-        self._geojson_worker.setParent(self)
-        self._geojson_worker.finished.connect(self.handle_geojson_result)
-        self._geojson_worker.finished.connect(self._geojson_worker.deleteLater)
-        self._geojson_worker.start()
+            self.log_text.append(LOG_FETCHING_MAIN.format(main_url))
+            self.log_text.append(LOG_FETCHING_COMPARISON.format(comp_url))
+            self.compare_button.setEnabled(False)
+            self._geojson_worker = GeoJsonWorker(main_url, comp_url)
+            self._geojson_worker.setParent(self)
+            self._geojson_worker.finished.connect(self.handle_geojson_result)
+            self._geojson_worker.finished.connect(self._geojson_worker.deleteLater)
+            self._geojson_worker.start()
+        except Exception as e:
+            sys.stderr.write(f"Error in compare_on_map: {e}\n")
+            self.log_text.append(f"ERROR: {e}")
+            self.compare_button.setEnabled(True) # Re-enable button on error
+
 
     def handle_geojson_result(self, result):
         self.compare_button.setEnabled(True)
