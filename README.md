@@ -9,7 +9,6 @@ The primary goals of this project are to:
 - Check the license of each boundary against a predefined list of acceptable licenses.
 - Provide a user-friendly interface to run the analysis and view the results.
 - Maintain a local cache of the boundary metadata to avoid unnecessary API calls.
-- Ensure a robust and clear selection of boundary data sources within the Data Collection interface, separating display labels from unique source identifiers.
 
 ## Features
 
