@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 
 from .config import BASE_URL, ADM_LEVELS, GITHUB_ISSUES_API_URL, GITHUB_PULL_REQUESTS_API_URL
+from .utils import requests_with_retry
 
 
 class GeoBoundariesAPI:
@@ -19,8 +20,7 @@ class GeoBoundariesAPI:
         """
         url = f"{self.base_url}/{iso}/{adm_level}/"
         try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
+            response = requests_with_retry(url)
             return response.json()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
@@ -145,8 +145,7 @@ def fetch_github_issues():
     Fetches open issues from the geoBoundaries GitHub repository.
     """
     try:
-        response = requests.get(GITHUB_ISSUES_API_URL)
-        response.raise_for_status()
+        response = requests_with_retry(GITHUB_ISSUES_API_URL)
         issues = response.json()
         return pd.DataFrame(issues)
     except requests.RequestException as e:
@@ -166,13 +165,10 @@ def fetch_github_pull_requests():
         headers["Authorization"] = f"token {token}"
     try:
         while True:
-            response = requests.get(
-                GITHUB_PULL_REQUESTS_API_URL,
-                params={"page": page, "per_page": per_page},
-                timeout=10,
-                headers=headers
-            )
-            response.raise_for_status()
+            # Construct the URL with query parameters for pagination
+            paginated_url = f"{GITHUB_PULL_REQUESTS_API_URL}?page={page}&per_page={per_page}"
+            
+            response = requests_with_retry(paginated_url, headers=headers)
             batch = response.json()
             if not batch:
                 break
@@ -188,8 +184,7 @@ def fetch_raw_github_content(url):
     Fetches raw content from a GitHub URL.
     """
     try:
-        response = requests.get(url)
-        response.raise_for_status()
+        response = requests_with_retry(url)
         return response.text
     except requests.RequestException as e:
         print(f"Error fetching raw content from {url}: {e}")
@@ -204,8 +199,7 @@ def fetch_single_pull_request(url):
     if token:
         headers["Authorization"] = f"token {token}"
     try:
-        response = requests.get(url, timeout=10, headers=headers)
-        response.raise_for_status()
+        response = requests_with_retry(url, headers=headers)
         return response.json()
     except requests.RequestException as e:
         print(f"Error fetching pull request from {url}: {e}")
@@ -221,8 +215,7 @@ def fetch_pull_request_files(pr_number):
     if token:
         headers["Authorization"] = f"token {token}"
     try:
-        response = requests.get(url, timeout=10, headers=headers)
-        response.raise_for_status()
+        response = requests_with_retry(url, headers=headers)
         return response.json()
     except requests.RequestException as e:
         print(f"Error fetching files for PR #{pr_number}: {e}")

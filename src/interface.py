@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import json
+import time
 import pandas as pd
 import requests
 import zipfile
@@ -29,6 +30,7 @@ from .config import (
     LOG_LICENSE_DETECTION_FINISHED, LOG_UNACCEPTABLE_LICENSES, LOG_FETCHING_GITHUB_ISSUES,
     LOG_GITHUB_ISSUES_FETCH_FINISHED, LOG_NO_ISSUES_FOUND
 )
+from .utils import requests_with_retry
 
 class WebEnginePage(QWebEnginePage):
     def javaScriptConsoleMessage(self, level, message, lineNumber, sourceID):
@@ -163,18 +165,17 @@ class PRDataWorker(qtc.QThread):
             last_error = None
             for url in candidate_urls:
                 try:
-                    response = requests.get(url, timeout=30) # Increased timeout for zip download
-                    response.raise_for_status()
+                    response = requests_with_retry(url, timeout=30)
                     content = response.content
-                    # Ensure we actually received a zip file
                     if not content.startswith(b"PK"):
                         last_error = f"URL returned non-zip content ({response.headers.get('Content-Type')})"
                         continue
                     zip_content = io.BytesIO(content)
-                    break
+                    break 
                 except requests.RequestException as e:
                     last_error = e
                     continue
+
             if not zip_content:
                 data['meta_txt'] = f"Error downloading zip file. Last error: {last_error}"
                 self.finished.emit(data)
@@ -209,11 +210,15 @@ class PRDataWorker(qtc.QThread):
                     # Extract license.png
                     try:
                         license_png_content = None
-                        license_png_candidates = [f"{boundary_identifier}_license.png", "license.png"] # Primary, then fallback
+                        license_png_candidates = [f"{boundary_identifier}_license.png", "license.png"]
                         
-                        for candidate in license_png_candidates:
-                            if candidate in zf.namelist():
-                                license_png_content = zf.read(candidate)
+                        # Case-insensitive search for license file
+                        for zip_filename in zf.namelist():
+                            for candidate in license_png_candidates:
+                                if zip_filename.lower() == candidate.lower():
+                                    license_png_content = zf.read(zip_filename)
+                                    break
+                            if license_png_content:
                                 break
                         
                         data['license_png_bytes'] = license_png_content
@@ -377,8 +382,7 @@ class GeoJsonWorker(qtc.QThread):
     def run(self):
         result = {'error': None, 'geojson': {}}
         try:
-            main_resp = requests.get(self.main_url, timeout=10)
-            main_resp.raise_for_status()
+            main_resp = requests_with_retry(self.main_url)
             result['geojson']['main'] = main_resp.text
         except requests.RequestException as e:
             result['error'] = f"Error fetching main GeoJSON: {e}"
@@ -386,8 +390,7 @@ class GeoJsonWorker(qtc.QThread):
             return
 
         try:
-            comp_resp = requests.get(self.comp_url, timeout=10)
-            comp_resp.raise_for_status()
+            comp_resp = requests_with_retry(self.comp_url)
             result['geojson']['comparison'] = comp_resp.text
         except requests.RequestException as e:
             result['error'] = f"Error fetching comparison GeoJSON: {e}"
