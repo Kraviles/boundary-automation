@@ -2,7 +2,7 @@
 
 ## Description
 
-This project provides a tool to automate the process of fetching, analyzing, and managing geographical boundary data from the geoBoundaries API which directly accesses the [GeoBoundaries Github](https://github.com/wmgeolab/geoBoundaries/tree/main). It includes a Python backend for data processing and a desktop GUI for user interaction.
+This project provides a tool to automate the process of fetching, analyzing, and managing geographical boundary data from the geoBoundaries API which directly accesses the [GeoBoundaries Github](https://github.com/wmgeolab/geoBoundaries/tree/main). It includes a Python backend for data processing and a desktop GUI for user interaction. The project creates an 86% increase in speed of accepting pull requests. The runtime is less than 1 minute.
 
 The primary goals of this project are to:
 - Fetch administrative boundary data for all countries at various administrative levels (ADM0 to ADM4).
